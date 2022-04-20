@@ -1,0 +1,8 @@
+
+source activate tensorflow_p37
+
+python -W ignore faye_cifar10_resnet_sync.py --job_name=ps --task_index=0 --num_gpus=1 --ps_hosts="172.31.89.127:2223" --worker_hosts="172.31.89.127:2222, 172.31.91.255:2222"
+
+python -W ignore faye_cifar10_resnet_sync.py --job_name=worker --task_index=0 --num_gpus=1 --ps_hosts="172.31.89.127:2223" --worker_hosts="172.31.89.127:2222, 172.31.91.255:2222"
+
+python -W ignore faye_cifar10_resnet_sync.py --job_name=worker --task_index=1 --num_gpus=1 --ps_hosts="172.31.89.127:2223" --worker_hosts="172.31.89.127:2222, 172.31.91.255:2222"
