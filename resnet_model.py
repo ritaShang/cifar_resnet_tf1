@@ -202,7 +202,8 @@ def block_layer(inputs, filters, block_fn, blocks, strides, is_training, name,
 
   return tf.identity(inputs, name)
 
-
+# filters： output size (channels)
+# kernel_size: patch size
 def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
   """Generator for CIFAR-10 ResNet v2 models.
   Args:
@@ -272,7 +273,8 @@ def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
   model.default_image_size = 32
   return model
 
-
+# filters： output size (channels)
+# kernel_size: patch size
 def imagenet_resnet_v2_generator(block_fn, layers, num_classes,
                                  data_format=None):
   """Generator for ImageNet ResNet v2 models.
