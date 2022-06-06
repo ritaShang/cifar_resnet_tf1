@@ -91,7 +91,7 @@ def train():
 #            labels = tf.reshape(labels, [-1, _NUM_CLASSES])
             labels = tf.one_hot(labels, 10, 1, 0)
             logits = network(inputs, True)
-            #print("模型shape:", logits.get_shape())
+            #print("logits shape:", logits.get_shape())
             cross_entropy = tf.losses.softmax_cross_entropy(
                 logits=logits, 
                 onehot_labels=labels)

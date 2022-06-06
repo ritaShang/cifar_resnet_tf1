@@ -1,6 +1,6 @@
 #coding = utf-8
-#cd E:\360Downloads\Github\cifar_resnet_tf1
-#conda activate tf1-cpu
+# cd E:\360Downloads\Github\cifar_resnet_tf1
+# conda activate tf1-cpu
 
 import tensorflow as tf
 import cifar10
