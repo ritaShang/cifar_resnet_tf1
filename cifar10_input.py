@@ -30,15 +30,15 @@ import tensorflow as tf
 IMAGE_SIZE = 32
 
 # Global constants describing the CIFAR-10 data set.
-if FLAGS.dataset == "cifar10":
-    NUM_CLASSES = 10
-elif FLAGS.dataset == "cifar100":
-    NUM_CLASSES = 100
+#if FLAGS.dataset == "cifar10":
+NUM_CLASSES = 10
+#elif FLAGS.dataset == "cifar100":
+#    NUM_CLASSES = 100
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
 
-def read_cifar10(filename_queue):
+def read_cifar10(dataset, filename_queue):
   """Reads and parses examples from CIFAR10 data files.
   Recommendation: if you want N-way read parallelism, call this function
   N times.  This will give you N independent Readers reading different
@@ -64,9 +64,9 @@ def read_cifar10(filename_queue):
   # Dimensions of the images in the CIFAR-10 dataset.
   # See http://www.cs.toronto.edu/~kriz/cifar.html for a description of the
   # input format.
-  if FLAGS.dataset == "cifar10":
+  if dataset == "cifar10":
     label_bytes = 1  # 1 for CIFAR-10
-  elif FLAGS.dataset == "cifar100":
+  elif dataset == "cifar100":
     label_bytes = 2  # 2 for CIFAR-100
   result.height = 32
   result.width = 32
@@ -86,9 +86,9 @@ def read_cifar10(filename_queue):
   record_bytes = tf.decode_raw(value, tf.uint8)
 
   # The first bytes represent the label, which we convert from uint8->int32.
-  if FLAGS.dataset == "cifar10":
+  if dataset == "cifar10":
     result.label = tf.cast(tf.slice(record_bytes, [0], [1]), tf.int32)
-  elif FLAGS.dataset == "cifar100":
+  elif dataset == "cifar100":
     result.label = tf.cast(tf.slice(record_bytes, [1], [1]), tf.int32)
 
   # The remaining bytes after the label represent the image, which we reshape
@@ -168,7 +168,7 @@ def distorted_inputs(dataset, data_dir, batch_size):
   filename_queue = tf.train.string_input_producer(filenames)
 
   # Read examples from files in the filename queue.
-  read_input = read_cifar10(filename_queue)
+  read_input = read_cifar10(dataset, filename_queue)
   reshaped_image = tf.cast(read_input.uint8image, tf.float32)
 
   height = IMAGE_SIZE

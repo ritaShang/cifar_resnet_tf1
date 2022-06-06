@@ -82,7 +82,7 @@ def train():
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
-            inputs, labels = cifar10.distorted_inputs(FLAGS.dataset)
+            inputs, labels = cifar10.distorted_inputs()
             network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
             #network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
             #inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
