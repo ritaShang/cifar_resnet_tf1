@@ -16,11 +16,11 @@ from tensorflow.python.client import timeline
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', './model_cifar10_resnet_train',
+tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_cifar10_resnet_train',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 # added by faye
-tf.app.flags.DEFINE_integer('max_steps', 500, """Number of batches to run.""")
+tf.app.flags.DEFINE_integer('max_steps', 2000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_boolean(
@@ -199,7 +199,7 @@ def train():
                         sec_per_batch = float(duration)
                         format_str = ('%s:local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, g_step, loss_value, examples_per_sec, sec_per_batch))
-                        loss_file.write("%d\t%s\t%s\t%s\n" %(g_step, loss_value, examples_per_sec, sec_per_batch))
+                        loss_file.write("%s\t%d\t%s\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
                 
             train_end = time.time()
