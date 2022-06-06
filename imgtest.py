@@ -3,16 +3,29 @@
 # conda activate tf1-cpu
 
 import tensorflow as tf
-import cifar10
+import os
 
-images, labels = cifar10.distorted_inputs()
-inputs = tf.reshape(images, [-1, 32, 32, 3])
-resized = tf.image.resize_images(inputs, (224, 224), method=0)
-#padded = tf.image.resize_image_with_crop_or_pad(images, 700, 900)
+filenames = ["./cifar-100-binary/test_batch.bin"]
+print("***** filenames:", filenames)
+filename_queue = tf.train.string_input_producer(filenames)
 
-with tf.Session() as sess:
-    #print("****** tf.shape(images):",sess.run(tf.shape(images)))  #[256,32,32,3]
-    #print("****** inputs:",sess.run(tf.shape(inputs)))   #[256,32,32,3]
-    print("****** tf.shape(resized)", sess.run(tf.shape(resized)) ) #[256,224,224,3]
-    #resized = tf.cast(resized, tf.int32)
-    #print("****** resized.eval() ",resized.eval())
+print("+++++++++", type(filename_queue))
+
+label_bytes = 2
+record_bytes = 2 + 3072
+  # Read a record, getting filenames from the filename_queue.  No
+  # header or footer in the CIFAR-10 format, so we leave header_bytes
+  # and footer_bytes at their default of 0.
+reader = tf.FixedLengthRecordReader(record_bytes=record_bytes)
+key, value = reader.read(filename_queue)
+
+  # Convert from a string to a vector of uint8 that is record_bytes long.
+record_bytes = tf.decode_raw(value, tf.uint8)
+
+  # The first bytes represent the label, which we convert from uint8->int32.
+label = tf.cast(
+      tf.slice(record_bytes, [0], [label_bytes]), tf.int32)
+
+
+#with tf.Session() as sess:
+#    print(sess.run(label))

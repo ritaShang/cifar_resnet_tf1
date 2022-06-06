@@ -58,6 +58,7 @@ tf.app.flags.DEFINE_integer('task_index', 0, 'Index of task within the job')
 tf.app.flags.DEFINE_boolean('issync', False, 'Whether synchronization')
 tf.app.flags.DEFINE_integer("num_gpus", 0, "Total number of gpus for each machine."
                      "If you don't use GPU, please set it to '0'")
+tf.app.flags.DEFINE_string('dataset', "cifar100", """The dataset to use.""")
 
 
 # Global constants describing the CIFAR-10 data set.
@@ -135,7 +136,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 
-def distorted_inputs(batch_size=FLAGS.batch_size):
+def distorted_inputs(dataset, batch_size=FLAGS.batch_size):
   """Construct distorted input for CIFAR training using the Reader ops.
   Returns:
     images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
@@ -147,7 +148,7 @@ def distorted_inputs(batch_size=FLAGS.batch_size):
   if not FLAGS.data_dir:
     raise ValueError('Please supply a data_dir')
   data_dir = os.path.join(FLAGS.data_dir)#, 'cifar-10-batches-bin')
-  return cifar10_input.distorted_inputs(data_dir=data_dir,
+  return cifar10_input.distorted_inputs(dataset,data_dir=data_dir,
                                         batch_size=batch_size)
 
 

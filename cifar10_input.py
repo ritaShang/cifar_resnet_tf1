@@ -30,7 +30,10 @@ import tensorflow as tf
 IMAGE_SIZE = 32
 
 # Global constants describing the CIFAR-10 data set.
-NUM_CLASSES = 10
+if FLAGS.dataset == "cifar10":
+    NUM_CLASSES = 10
+elif FLAGS.dataset == "cifar100":
+    NUM_CLASSES = 100
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
@@ -61,7 +64,10 @@ def read_cifar10(filename_queue):
   # Dimensions of the images in the CIFAR-10 dataset.
   # See http://www.cs.toronto.edu/~kriz/cifar.html for a description of the
   # input format.
-  label_bytes = 1  # 2 for CIFAR-100
+  if FLAGS.dataset == "cifar10":
+    label_bytes = 1  # 1 for CIFAR-10
+  elif FLAGS.dataset == "cifar100":
+    label_bytes = 2  # 2 for CIFAR-100
   result.height = 32
   result.width = 32
   result.depth = 3
@@ -80,8 +86,10 @@ def read_cifar10(filename_queue):
   record_bytes = tf.decode_raw(value, tf.uint8)
 
   # The first bytes represent the label, which we convert from uint8->int32.
-  result.label = tf.cast(
-      tf.slice(record_bytes, [0], [label_bytes]), tf.int32)
+  if FLAGS.dataset == "cifar10":
+    result.label = tf.cast(tf.slice(record_bytes, [0], [1]), tf.int32)
+  elif FLAGS.dataset == "cifar100":
+    result.label = tf.cast(tf.slice(record_bytes, [1], [1]), tf.int32)
 
   # The remaining bytes after the label represent the image, which we reshape
   # from [depth * height * width] to [depth, height, width].
@@ -136,7 +144,7 @@ def _generate_image_and_label_batch(image, label, min_queue_examples,
   return images, tf.reshape(label_batch, [batch_size])
 
 
-def distorted_inputs(data_dir, batch_size):
+def distorted_inputs(dataset, data_dir, batch_size):
   """Construct distorted input for CIFAR training using the Reader ops.
   Args:
     data_dir: Path to the CIFAR-10 data directory.
@@ -145,11 +153,16 @@ def distorted_inputs(data_dir, batch_size):
     images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
     labels: Labels. 1D tensor of [batch_size] size.
   """
-  filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i)
-               for i in xrange(1, 6)]
-  for f in filenames:
-    if not tf.gfile.Exists(f):
-      raise ValueError('Failed to find file: ' + f)
+  if dataset == "cifar10":
+    filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
+    for f in filenames:
+        if not tf.gfile.Exists(f):
+            raise ValueError('Failed to find file: ' + f)
+  elif dataset == "cifar100":
+    filenames = os.path.join(data_dir, 'train.bin')
+    if not tf.gfile.Exists(filenames):
+        raise ValueError('Failed to find file: ' + filenames)
+            
 
   # Create a queue that produces the filenames to read.
   filename_queue = tf.train.string_input_producer(filenames)
@@ -189,7 +202,6 @@ def distorted_inputs(data_dir, batch_size):
   # Generate a batch of images and labels by building up a queue of examples.
   return _generate_image_and_label_batch(float_image, read_input.label,
                                          min_queue_examples, batch_size,
-#                                         min_queue_examples, batch_size,
                                          shuffle=True)
 
 
@@ -208,7 +220,7 @@ def inputs(eval_data, data_dir, batch_size):
                  for i in xrange(1, 6)]
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
   else:
-    filenames = [os.path.join(data_dir, 'test_batch.bin')]
+    filenames = os.path.join(data_dir, 'test_batch.bin')
     num_examples_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
   for f in filenames:

@@ -19,7 +19,6 @@ FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_cifar10_resnet_train',
                            """Directory where to write event logs """
                            """and checkpoint.""")
-# added by faye
 tf.app.flags.DEFINE_integer('max_steps', 3000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
@@ -83,7 +82,7 @@ def train():
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
-            inputs, labels = cifar10.distorted_inputs()
+            inputs, labels = cifar10.distorted_inputs(FLAGS.dataset)
             network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
             #network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
             #inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
