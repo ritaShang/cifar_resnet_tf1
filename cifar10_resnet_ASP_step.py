@@ -63,7 +63,7 @@ def train():
         
         if not(tf.gfile.Exists(FLAGS.train_dir)):
             tf.gfile.MakeDirs(FLAGS.train_dir)
-        file = FLAGS.train_dir +"/"+ FLAGS.job_name + str(FLAGS.task_index) + "_step_b"+str(FLAGS.batch_size) + "_s"+ str(FLAGS.max_steps) + ".txt"
+        file = FLAGS.train_dir +"/resnet"+ FLAGS.resnet_size + "_" + FLAGS.job_name + str(FLAGS.task_index) + "_step_b"+str(FLAGS.batch_size) + "_s"+ str(FLAGS.max_steps) + ".txt"
         loss_file = open(file, "w")
         
         
@@ -83,16 +83,13 @@ def train():
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
-            images, labels = cifar10.distorted_inputs()
-            #re = tf.shape(images)[0]
-            #network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
-            network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
+            inputs, labels = cifar10.distorted_inputs()
+            network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
+            #network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
             #inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
-            inputs = tf.image.resize_images(images, (224, 224), method=0)
-#            labels = tf.reshape(labels, [-1, _NUM_CLASSES])
+            #inputs = tf.image.resize_images(images, (224, 224), method=0)
             labels = tf.one_hot(labels, 10, 1, 0)
             logits = network(inputs, True)
-            #print("logits shape:", logits.get_shape())
             cross_entropy = tf.losses.softmax_cross_entropy(
                 logits=logits, 
                 onehot_labels=labels)
