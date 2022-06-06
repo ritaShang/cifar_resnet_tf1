@@ -273,8 +273,8 @@ def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
   model.default_image_size = 32
   return model
 
-# filters： output size (channels)
-# kernel_size: patch size
+# filters:output size (channels)
+# kernel_size:patch size
 def imagenet_resnet_v2_generator(block_fn, layers, num_classes,
                                  data_format=None):
   """Generator for ImageNet ResNet v2 models.
