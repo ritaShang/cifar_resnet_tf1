@@ -22,7 +22,7 @@ tf.app.flags.DEFINE_string('train_dir', './model_cifar10_resnet_train',
 # added by faye
 tf.app.flags.DEFINE_integer('max_steps', 500, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
-tf.app.flags.DEFINE_integer('resnet_size', 32, """The size of the ResNet model to use.""")
+tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_boolean(
     "existing_servers", False, "Whether servers already exists. If True, "
     "will use the worker hosts via their GRPC URLs (one client process "
@@ -85,9 +85,10 @@ def train():
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
             images, labels = cifar10.distorted_inputs()
             #re = tf.shape(images)[0]
-            network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
+            #network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
+            network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
             #inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
-            inputs = images
+            inputs = tf.image.resize_images(images, (224, 224), method=0)
 #            labels = tf.reshape(labels, [-1, _NUM_CLASSES])
             labels = tf.one_hot(labels, 10, 1, 0)
             logits = network(inputs, True)
