@@ -51,8 +51,8 @@ tf.app.flags.DEFINE_integer('batch_size', 256,
 tf.app.flags.DEFINE_string('data_dir', './cifar-10-batches-bin',
                            """Path to the CIFAR-10 data directory.""")
 
-tf.app.flags.DEFINE_string('ps_hosts', None, 'Comma-separated list of hostname:port pairs')
-tf.app.flags.DEFINE_string('worker_hosts', None,'Comma-separated list of hostname:port pairs')
+tf.app.flags.DEFINE_string('ps_hosts', "localhost:5555", 'Comma-separated list of hostname:port pairs')
+tf.app.flags.DEFINE_string('worker_hosts', "localhost:5557",'Comma-separated list of hostname:port pairs')
 tf.app.flags.DEFINE_string('job_name', None, 'job name: worker or ps')
 tf.app.flags.DEFINE_integer('task_index', 0, 'Index of task within the job')
 tf.app.flags.DEFINE_boolean('issync', False, 'Whether synchronization')

@@ -16,11 +16,11 @@ from tensorflow.python.client import timeline
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet/model_cifar10_resnet_train',
+tf.app.flags.DEFINE_string('train_dir', './model_cifar10_resnet_train',
                            """Directory where to write event logs """
                            """and checkpoint.""")
 # added by faye
-tf.app.flags.DEFINE_integer('max_steps', 7000, """Number of batches to run.""")
+tf.app.flags.DEFINE_integer('max_steps', 500, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 32, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_boolean(
@@ -87,10 +87,11 @@ def train():
             #re = tf.shape(images)[0]
             network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
             inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
+            #inputs = images
 #            labels = tf.reshape(labels, [-1, _NUM_CLASSES])
             labels = tf.one_hot(labels, 10, 1, 0)
             logits = network(inputs, True)
-            print("模型shape:", logits.get_shape())
+            #print("模型shape:", logits.get_shape())
             cross_entropy = tf.losses.softmax_cross_entropy(
                 logits=logits, 
                 onehot_labels=labels)
@@ -213,7 +214,7 @@ def train():
 def main(argv=None):
     #cifar10.maybe_download_and_extract()
     print("Success to ENTER!")
-    os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+    #os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
     train()
 
 if __name__ == '__main__':
