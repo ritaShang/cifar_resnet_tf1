@@ -20,7 +20,7 @@ tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_cifar10_re
                            """Directory where to write event logs """
                            """and checkpoint.""")
 # added by faye
-tf.app.flags.DEFINE_integer('max_steps', 2000, """Number of batches to run.""")
+tf.app.flags.DEFINE_integer('max_steps', 3000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_boolean(
