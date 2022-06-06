@@ -48,7 +48,7 @@ FLAGS = tf.app.flags.FLAGS
 #tf.app.flags.DEFINE_integer('batch_size', 128,
 tf.app.flags.DEFINE_integer('batch_size', 256,
                             """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('data_dir', '/home/ubuntu/datasets/cifar-10-batches-bin',
+tf.app.flags.DEFINE_string('data_dir', '/test/datasets/cifar-10-batches-bin',
                            """Path to the CIFAR-10 data directory.""")
 
 tf.app.flags.DEFINE_string('ps_hosts', "localhost:5555", 'Comma-separated list of hostname:port pairs')
