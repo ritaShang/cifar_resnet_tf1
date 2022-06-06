@@ -63,7 +63,7 @@ def train():
         
         if not(tf.gfile.Exists(FLAGS.train_dir)):
             tf.gfile.MakeDirs(FLAGS.train_dir)
-        file = FLAGS.train_dir +"/resnet"+ FLAGS.resnet_size + "_" + FLAGS.job_name + str(FLAGS.task_index) + "_step_b"+str(FLAGS.batch_size) + "_s"+ str(FLAGS.max_steps) + ".txt"
+        file = FLAGS.train_dir +"/resnet"+ str(FLAGS.resnet_size) + "_" + FLAGS.job_name + str(FLAGS.task_index) + "_step_b"+str(FLAGS.batch_size) + "_s"+ str(FLAGS.max_steps) + ".txt"
         loss_file = open(file, "w")
         
         
