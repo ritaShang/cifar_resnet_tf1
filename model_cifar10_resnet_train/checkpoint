@@ -1,2 +1,0 @@
-model_checkpoint_path: "/test/cifar_resnet/model_cifar10_resnet_train/model.ckpt-0"
-all_model_checkpoint_paths: "/test/cifar_resnet/model_cifar10_resnet_train/model.ckpt-0"
