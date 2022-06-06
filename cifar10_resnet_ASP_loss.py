@@ -185,13 +185,6 @@ def train():
             batch_size_num = FLAGS.batch_size
             while loss_match < FLAGS.match_time:
                 start_time = time.time()
-                #run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                #run_metadata = tf.RunMetadata()
-                #if step <= 5:
-                #batch_size_num = FLAGS.batch_size
-                #num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / batch_size_num
-                #decay_steps_num = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
-                #_, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num},  options=run_options, run_metadata=run_metadata)
                 _, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
