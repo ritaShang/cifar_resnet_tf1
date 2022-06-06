@@ -155,13 +155,11 @@ def distorted_inputs(dataset, data_dir, batch_size):
   """
   if dataset == "cifar10":
     filenames = [os.path.join(data_dir, 'data_batch_%d.bin' % i) for i in xrange(1, 6)]
-    for f in filenames:
-        if not tf.gfile.Exists(f):
-            raise ValueError('Failed to find file: ' + f)
   elif dataset == "cifar100":
-    filenames = os.path.join(data_dir, 'train.bin')
-    if not tf.gfile.Exists(filenames):
-        raise ValueError('Failed to find file: ' + filenames)
+    filenames = [os.path.join(data_dir, 'train.bin')]
+  for f in filenames:
+    if not tf.gfile.Exists(f):
+        raise ValueError('Failed to find file: ' + f)
             
 
   # Create a queue that produces the filenames to read.
