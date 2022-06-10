@@ -1,3 +1,4 @@
 cifar-10-batches-bin/
 cifar-100-binary/
 ./idea
+./gitignore
