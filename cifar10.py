@@ -50,7 +50,9 @@ tf.app.flags.DEFINE_integer('batch_size', 128,
                             """Number of images to process in a batch.""")
 tf.app.flags.DEFINE_string('data_dir', '/test/datasets/cifar-100-binary',
                            """Path to the CIFAR-10 data directory.""")
-
+tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_resnet_train',
+                           """Directory where to write event logs """
+                           """and checkpoint.""")
 tf.app.flags.DEFINE_string('ps_hosts', "localhost:5555", 'Comma-separated list of hostname:port pairs')
 tf.app.flags.DEFINE_string('worker_hosts', "localhost:5557",'Comma-separated list of hostname:port pairs')
 tf.app.flags.DEFINE_string('job_name', None, 'job name: worker or ps')

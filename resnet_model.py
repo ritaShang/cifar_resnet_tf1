@@ -223,18 +223,17 @@ def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
   num_blocks = (resnet_size - 2) // 6
 
   if data_format is None:
-    #data_format = ('channels_first' if tf.test.is_built_with_cuda() else 'channels_last')
     data_format = ('channels_first' if tf.test.is_gpu_available() else 'channels_last')
-  print("~~~~~~~~~~~~~~~~~~~~~data_format: ",data_format)
 
   def model(inputs, is_training):
     """Constructs the ResNet model given the inputs."""
     if data_format == 'channels_first':
       # Convert from channels_last (NHWC) to channels_first (NCHW). This
-      # provides a large performance boost on GPU. See
-      # https://www.tensorflow.org/performance/performance_guide#data_formats
+      # provides a large performance boost on GPU.
       inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
+    print('inputs')
+    print(inputs.get_shape().as_list())
     inputs = conv2d_fixed_padding(
         inputs=inputs, filters=16, kernel_size=3, strides=1,
         data_format=data_format)
@@ -256,21 +255,16 @@ def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
     inputs = batch_norm_relu(inputs, is_training, data_format)
     inputs = tf.layers.average_pooling2d(
         inputs=inputs, pool_size=8, strides=1, padding='VALID',
-#        inputs=inputs, pool_size=8, strides=1, padding='SAME',
         data_format=data_format)
     inputs = tf.identity(inputs, 'final_avg_pool')
-    print('look0')
-    print(inputs.get_shape().as_list())
     inputs = tf.reshape(inputs, [-1, 64])
-    print('look1')
-    print(inputs.get_shape().as_list())
     inputs = tf.layers.dense(inputs=inputs, units=num_classes)
-    print('look2')
-    print(inputs.get_shape().as_list())
     inputs = tf.identity(inputs, 'final_dense')
+
     return inputs
 
   model.default_image_size = 32
+
   return model
 
 # filters:output size (channels)
@@ -291,8 +285,7 @@ def imagenet_resnet_v2_generator(block_fn, layers, num_classes,
     returns the output tensor of the ResNet model.
   """
   if data_format is None:
-    data_format = (
-        'channels_first' if tf.test.is_built_with_cuda() else 'channels_last')
+    data_format = ('channels_first' if tf.test.is_gpu_available() else 'channels_last')
 
   def model(inputs, is_training):
     """Constructs the ResNet model given the inputs."""
@@ -332,8 +325,7 @@ def imagenet_resnet_v2_generator(block_fn, layers, num_classes,
         inputs=inputs, pool_size=7, strides=1, padding='VALID',
         data_format=data_format)
     inputs = tf.identity(inputs, 'final_avg_pool')
-    inputs = tf.reshape(inputs,
-                        [-1, 512 if block_fn is building_block else 2048])
+    inputs = tf.reshape(inputs, [-1, 512 if block_fn is building_block else 2048])
     inputs = tf.layers.dense(inputs=inputs, units=num_classes)
     inputs = tf.identity(inputs, 'final_dense')
     return inputs

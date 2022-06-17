@@ -16,40 +16,35 @@ from tensorflow.python.client import timeline
 
 FLAGS = tf.app.flags.FLAGS
 
-tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_cifar10_resnet_train',
-                           """Directory where to write event logs """
-                           """and checkpoint.""")
 tf.app.flags.DEFINE_integer('max_steps', 3000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
+tf.app.flags.DEFINE_boolean('TF_FORCE_GPU_ALLOW_GROWTH', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
-tf.app.flags.DEFINE_boolean(
-    "existing_servers", False, "Whether servers already exists. If True, "
-    "will use the worker hosts via their GRPC URLs (one client process "
-    "per worker host). Otherwise, will create an in-process TensorFlow "
-    "server.")
+# cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
+# resnet_v2(resnet 18 34 50 101 152 200)
+
 tf.logging.set_verbosity(tf.logging.INFO)
 
 INITIAL_LEARNING_RATE = 0.32       # Initial learning rate.
 MOVING_AVERAGE_DECAY = 0.9999     # The decay to use for the moving average.
-NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
-NUM_EPOCHS_PER_DECAY = 350.0      # Epochs after which learning rate decays.
 LEARNING_RATE_DECAY_FACTOR = 0.1  # Learning rate decay factor.
 
-updated_batch_size_num = 28
 _HEIGHT = 32
 _WIDTH = 32
 _DEPTH = 3
-_NUM_CLASSES = 10
-_NUM_DATA_FILES = 5
+
+if FLAGS.dataset == "cifar10":
+    _NUM_CLASSES = 10
+elif FLAGS.dataset == "cifar100":
+    _NUM_CLASSES = 100
+
 _WEIGHT_DECAY = 2e-4
+
 
 def train():
     enter_time = time.time()
-    global updated_batch_size_num
     worker_hosts = FLAGS.worker_hosts.split(',')
     ps_hosts = FLAGS.ps_hosts.split(',')
-    print ('PS hosts are: %s' % ps_hosts)
-    print ('Worker hosts are: %s' % worker_hosts)
     issync = FLAGS.issync
     cluster = tf.train.ClusterSpec({'ps': ps_hosts, 'worker': worker_hosts})
     server = tf.train.Server(cluster, job_name=FLAGS.job_name, task_index=FLAGS.task_index)
@@ -62,11 +57,12 @@ def train():
         
         if not(tf.gfile.Exists(FLAGS.train_dir)):
             tf.gfile.MakeDirs(FLAGS.train_dir)
-        file = FLAGS.train_dir +"/" + FLAGS.job_name + str(FLAGS.task_index) + "resnet" + str(FLAGS.resnet_size) + "_b"+str(FLAGS.batch_size) + "_s"+ str(FLAGS.max_steps) + ".txt"
+        file = FLAGS.train_dir + "/" + FLAGS.job_name + str(FLAGS.task_index) + \
+               "_resnet" + str(FLAGS.resnet_size) + \
+               "_b" + str(FLAGS.batch_size) + "_s" + str(FLAGS.max_steps) + ".txt"
         loss_file = open(file, "w")
-        
-        
-        worker_device="/job:worker/task:%d" % FLAGS.task_index
+
+        worker_device = "/job:worker/task:%d" % FLAGS.task_index
         if FLAGS.num_gpus > 0:
             gpu = (FLAGS.task_index % FLAGS.num_gpus)
             worker_device = "/job:worker/task:%d/gpu:%d" % (FLAGS.task_index, gpu)            
@@ -85,15 +81,18 @@ def train():
             inputs, labels = cifar10.distorted_inputs()
             network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
             #network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
-            #inputs = tf.reshape(images, [-1, _HEIGHT, _WIDTH, _DEPTH])
             #inputs = tf.image.resize_images(images, (224, 224), method=0)
-            labels = tf.one_hot(labels, 10, 1, 0)
+            if FLAGS.dataset == "cifar10":
+                labels = tf.one_hot(labels, 10, 1, 0)
+            elif FLAGS.dataset == "cifar100":
+                labels = tf.one_hot(labels, 100, 1, 0)
             logits = network(inputs, True)
-            cross_entropy = tf.losses.softmax_cross_entropy(
-                logits=logits, 
-                onehot_labels=labels)
-            loss = cross_entropy + _WEIGHT_DECAY * tf.add_n(
-                [tf.nn.l2_loss(v) for v in tf.trainable_variables()])
+            print("********* tf.shape(logits): ", logits)
+            print("********* tf.shape(inputs): ", inputs)
+            print("********* tf.shape(labels): ", labels)
+            cross_entropy = tf.losses.softmax_cross_entropy(logits=logits, onehot_labels=labels)
+
+            loss = cross_entropy + _WEIGHT_DECAY * tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
             # Decay the learning rate exponentially based on the number of steps.
             lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
                                             global_step,
@@ -108,7 +107,6 @@ def train():
             variables_averages_op = exp_moving_averager.apply(tf.trainable_variables())
 
             # added by faye
-            #grads = opt.compute_gradients(loss)
             grads0 = opt.compute_gradients(loss) 
             grads = [(tf.scalar_mul(tf.cast(batch_size/FLAGS.batch_size, tf.float32), grad), var) for grad, var in grads0]
 
@@ -120,7 +118,6 @@ def train():
                     variable_averages=exp_moving_averager,
                     variables_to_average=variables_to_average)
                 if is_chief:
-                    #chief_queue_runners = [opt.get_chief_queue_runner()]
                     chief_queue_runners = opt.get_chief_queue_runner()
                     init_tokens_op = opt.get_init_tokens_op()
 
@@ -135,7 +132,6 @@ def train():
                                      recovery_wait_secs=1)
                                      #save_model_secs=60)
 
-
             sess_config = tf.ConfigProto(
                 allow_soft_placement=True, 
                 log_device_placement=FLAGS.log_device_placement)
@@ -146,8 +142,6 @@ def train():
                 print("Worker %d: Waiting for session to be initialized..." % FLAGS.task_index)
             
             # Get a session.
-            
-            
             sess = sv.prepare_or_wait_for_session(server.target, config=sess_config)
 
             print("Worker %d: Session initialization complete." % FLAGS.task_index)
@@ -173,11 +167,6 @@ def train():
                 start_time = time.time()
                 #run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 #run_metadata = tf.RunMetadata()
-                #if step <= 5:
-                #batch_size_num = FLAGS.batch_size
-                #num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / batch_size_num
-                #decay_steps_num = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
-                #_, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num},  options=run_options, run_metadata=run_metadata)
                 _, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
@@ -187,7 +176,7 @@ def train():
                     print("First sessrun time is @ %f" % (fisrt_sessrun_done - train_begin))
                     tag = 0
                     FirstSessRunTime = fisrt_sessrun_done - train_begin
-                    
+
                 if step % 10 == 0:
                         duration = time.time() - start_time
                         num_examples_per_step = batch_size_num
@@ -210,8 +199,7 @@ def train():
 
 def main(argv=None):
     #cifar10.maybe_download_and_extract()
-    print("Success to ENTER!")
-    #os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = 'true'
+    os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = FLAGS.TF_FORCE_GPU_ALLOW_GROWTH
     train()
 
 if __name__ == '__main__':

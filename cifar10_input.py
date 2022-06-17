@@ -28,12 +28,7 @@ import tensorflow as tf
 # image size of 32 x 32. If one alters this number, then the entire model
 # architecture will change and any model would need to be retrained.
 IMAGE_SIZE = 32
-
-# Global constants describing the CIFAR-10 data set.
-#if FLAGS.dataset == "cifar10":
-NUM_CLASSES = 10
-#elif FLAGS.dataset == "cifar100":
-#    NUM_CLASSES = 100
+# Global constants describing the  dataset.
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = 50000
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = 10000
 
@@ -68,6 +63,8 @@ def read_cifar10(dataset, filename_queue):
     label_bytes = 1  # 1 for CIFAR-10
   elif dataset == "cifar100":
     label_bytes = 2  # 2 for CIFAR-100
+  print("label bytes:", label_bytes)
+
   result.height = 32
   result.width = 32
   result.depth = 3
@@ -87,8 +84,10 @@ def read_cifar10(dataset, filename_queue):
 
   # The first bytes represent the label, which we convert from uint8->int32.
   if dataset == "cifar10":
+    print("******* read cifar10 dataset")
     result.label = tf.cast(tf.slice(record_bytes, [0], [1]), tf.int32)
   elif dataset == "cifar100":
+    print("******* read cifar100 dataset")
     result.label = tf.cast(tf.slice(record_bytes, [1], [1]), tf.int32)
 
   # The remaining bytes after the label represent the image, which we reshape
@@ -160,7 +159,7 @@ def distorted_inputs(dataset, data_dir, batch_size):
   for f in filenames:
     if not tf.gfile.Exists(f):
         raise ValueError('Failed to find file: ' + f)
-            
+  print("********* filenames: ", filenames)
 
   # Create a queue that produces the filenames to read.
   filename_queue = tf.train.string_input_producer(filenames)
@@ -177,7 +176,6 @@ def distorted_inputs(dataset, data_dir, batch_size):
 
   # Randomly crop a [height, width] section of the image.
   distorted_image = tf.random_crop(reshaped_image, [height, width, 3])
-
   # Randomly flip the image horizontally.
   distorted_image = tf.image.random_flip_left_right(distorted_image)
 
@@ -187,7 +185,7 @@ def distorted_inputs(dataset, data_dir, batch_size):
   distorted_image = tf.image.random_contrast(distorted_image,lower=0.2, upper=1.8)
 
   # Subtract off the mean and divide by the variance of the pixels.
-#  float_image = tf.image.per_image_whitening(distorted_image)
+  #float_image = tf.image.per_image_whitening(distorted_image)
   float_image = tf.image.per_image_standardization(distorted_image)
 
   # Ensure that the random shuffling has good mixing properties.
