@@ -64,8 +64,8 @@ tf.app.flags.DEFINE_string('dataset', "cifar100", """The dataset to use.""")
 
 
 # Global constants describing the CIFAR-10 data set.
-IMAGE_SIZE = cifar10_input.IMAGE_SIZE
-NUM_CLASSES = cifar10_input.NUM_CLASSES
+#IMAGE_SIZE = cifar10_input.IMAGE_SIZE
+#NUM_CLASSES = cifar10_input.NUM_CLASSES
 NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN
 NUM_EXAMPLES_PER_EPOCH_FOR_EVAL = cifar10_input.NUM_EXAMPLES_PER_EPOCH_FOR_EVAL
 
@@ -149,8 +149,8 @@ def distorted_inputs(dataset=FLAGS.dataset, batch_size=FLAGS.batch_size):
 #  print ('global batch_size: %d' % batch_size)
   if not FLAGS.data_dir:
     raise ValueError('Please supply a data_dir')
-  data_dir = os.path.join(FLAGS.data_dir)#, 'cifar-10-batches-bin')
-  return cifar10_input.distorted_inputs(dataset=dataset,data_dir=data_dir,
+  data_dir = os.path.join(FLAGS.data_dir)
+  return cifar10_input.distorted_inputs(dataset=dataset, data_dir=data_dir,
                                         batch_size=batch_size)
 
 
