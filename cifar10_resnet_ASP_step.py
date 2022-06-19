@@ -15,13 +15,31 @@ import cifar10
 from tensorflow.python.client import timeline
 
 FLAGS = tf.app.flags.FLAGS
+# Basic model parameters.
+tf.app.flags.DEFINE_integer('batch_size', 128,
+                            """Number of images to process in a batch.""")
+tf.app.flags.DEFINE_string('data_dir', '/test/datasets/cifar-100-binary',
+                           """Path to the CIFAR-10 data directory.""")
+tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_resnet_train',
+                           """Directory where to write event logs """
+                           """and checkpoint.""")
+tf.app.flags.DEFINE_string('ps_hosts', "localhost:5555", 'Comma-separated list of hostname:port pairs')
+tf.app.flags.DEFINE_string('worker_hosts', "localhost:5557",'Comma-separated list of hostname:port pairs')
+tf.app.flags.DEFINE_string('job_name', None, 'job name: worker or ps')
+tf.app.flags.DEFINE_integer('task_index', 0, 'Index of task within the job')
+tf.app.flags.DEFINE_boolean('issync', False, 'Whether synchronization')
+tf.app.flags.DEFINE_integer("num_gpus", 0, "Total number of gpus for each machine."
+                     "If you don't use GPU, please set it to '0'")
+tf.app.flags.DEFINE_string('dataset', "cifar100", """The dataset to use.""")
 
+tf.app.flags.DEFINE_string('TF_FORCE_GPU_ALLOW_GROWTH', 'false', """""")
 tf.app.flags.DEFINE_integer('max_steps', 3000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
-tf.app.flags.DEFINE_boolean('TF_FORCE_GPU_ALLOW_GROWTH', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
+
+
 
 tf.logging.set_verbosity(tf.logging.INFO)
 
@@ -78,7 +96,7 @@ def train():
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
-            inputs, labels = cifar10.distorted_inputs()
+            inputs, labels = cifar10.distorted_inputs(FLAGS.data_dir, FLAGS.dataset, FLAGS.batch_size)
             network = resnet_model.cifar10_resnet_v2_generator(FLAGS.resnet_size, _NUM_CLASSES)
             #network = resnet_model.resnet_v2(FLAGS.resnet_size, _NUM_CLASSES)
             #inputs = tf.image.resize_images(images, (224, 224), method=0)

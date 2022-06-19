@@ -42,27 +42,6 @@ import tensorflow as tf
 #from tensorflow.models.image.cifar10 import cifar10_input
 import cifar10_input
 
-FLAGS = tf.app.flags.FLAGS
-
-# Basic model parameters.
-#tf.app.flags.DEFINE_integer('batch_size', 128,
-tf.app.flags.DEFINE_integer('batch_size', 128,
-                            """Number of images to process in a batch.""")
-tf.app.flags.DEFINE_string('data_dir', '/test/datasets/cifar-100-binary',
-                           """Path to the CIFAR-10 data directory.""")
-tf.app.flags.DEFINE_string('train_dir', '/test/cifar_resnet_tf1/model_resnet_train',
-                           """Directory where to write event logs """
-                           """and checkpoint.""")
-tf.app.flags.DEFINE_string('ps_hosts', "localhost:5555", 'Comma-separated list of hostname:port pairs')
-tf.app.flags.DEFINE_string('worker_hosts', "localhost:5557",'Comma-separated list of hostname:port pairs')
-tf.app.flags.DEFINE_string('job_name', None, 'job name: worker or ps')
-tf.app.flags.DEFINE_integer('task_index', 0, 'Index of task within the job')
-tf.app.flags.DEFINE_boolean('issync', False, 'Whether synchronization')
-tf.app.flags.DEFINE_integer("num_gpus", 0, "Total number of gpus for each machine."
-                     "If you don't use GPU, please set it to '0'")
-tf.app.flags.DEFINE_string('dataset', "cifar100", """The dataset to use.""")
-
-
 # Global constants describing the CIFAR-10 data set.
 #IMAGE_SIZE = cifar10_input.IMAGE_SIZE
 #NUM_CLASSES = cifar10_input.NUM_CLASSES
@@ -138,7 +117,7 @@ def _variable_with_weight_decay(name, shape, stddev, wd):
   return var
 
 
-def distorted_inputs(dataset=FLAGS.dataset, batch_size=FLAGS.batch_size):
+def distorted_inputs(data_dir, dataset, batch_size):
   """Construct distorted input for CIFAR training using the Reader ops.
   Returns:
     images: Images. 4D tensor of [batch_size, IMAGE_SIZE, IMAGE_SIZE, 3] size.
@@ -147,14 +126,14 @@ def distorted_inputs(dataset=FLAGS.dataset, batch_size=FLAGS.batch_size):
     ValueError: If no data_dir
   """
 #  print ('global batch_size: %d' % batch_size)
-  if not FLAGS.data_dir:
+  if not data_dir:
     raise ValueError('Please supply a data_dir')
-  data_dir = os.path.join(FLAGS.data_dir)
+  data_dir = os.path.join(data_dir)
   return cifar10_input.distorted_inputs(dataset=dataset, data_dir=data_dir,
                                         batch_size=batch_size)
 
 
-def inputs(eval_data, batch_size=FLAGS.batch_size):
+def inputs(eval_data, batch_size):
   """Construct input for CIFAR evaluation using the Reader ops.
   Args:
     eval_data: bool, indicating if one should use the train or eval data set.
@@ -164,14 +143,14 @@ def inputs(eval_data, batch_size=FLAGS.batch_size):
   Raises:
     ValueError: If no data_dir
   """
-  if not FLAGS.data_dir:
+  if not data_dir:
     raise ValueError('Please supply a data_dir')
-  data_dir = os.path.join(FLAGS.data_dir, 'cifar-10-batches-bin')
+  data_dir = os.path.join(data_dir, 'cifar-10-batches-bin')
   return cifar10_input.inputs(eval_data=eval_data, data_dir=data_dir,
                               batch_size=batch_size)
 
 
-def inference(images, batch_size=FLAGS.batch_size):
+def inference(images, batch_size):
   """Build the CIFAR-10 model.
   Args:
     images: Images returned from distorted_inputs() or inputs().
@@ -251,7 +230,7 @@ def inference(images, batch_size=FLAGS.batch_size):
   return softmax_linear
 
 
-def loss(logits, labels, batch_size=FLAGS.batch_size):
+def loss(logits, labels, batch_size):
   """Add L2Loss to all the trainable variables.
   Add summary for "Loss" and "Loss/avg".
   Args:
@@ -300,7 +279,7 @@ def _add_loss_summaries(total_loss):
   return loss_averages_op
 
 
-def train(total_loss, global_step):
+def train(total_loss, global_step, data_dir):
   """Train CIFAR-10 model.
   Create an optimizer and apply to all trainable variables. Add moving
   average for all trainable variables.
@@ -312,7 +291,7 @@ def train(total_loss, global_step):
     train_op: op for training.
   """
   # Variables that affect learning rate.
-  num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / FLAGS.batch_size
+  num_batches_per_epoch = NUM_EXAMPLES_PER_EPOCH_FOR_TRAIN / batch_size
   decay_steps = int(num_batches_per_epoch * NUM_EPOCHS_PER_DECAY)
 
   # Decay the learning rate exponentially based on the number of steps.
@@ -354,9 +333,9 @@ def train(total_loss, global_step):
   return train_op
 
 
-def maybe_download_and_extract():
+def maybe_download_and_extract(data_dir):
   """Download and extract the tarball from Alex's website."""
-  dest_directory = FLAGS.data_dir
+  dest_directory = data_dir
   if not os.path.exists(dest_directory):
     os.makedirs(dest_directory)
   filename = DATA_URL.split('/')[-1]
