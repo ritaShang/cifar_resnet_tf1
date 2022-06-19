@@ -203,7 +203,7 @@ def train():
                         sec_per_batch = float(duration)
                         format_str = ('%s:local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
                         print(format_str % (datetime.now(), step, g_step, loss_value, examples_per_sec))
-                        loss_file.write("%s\t%d\t%s\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec))
+                        loss_file.write("%s\t%d\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec))
                 step += 1
                 
             train_end = time.time()
