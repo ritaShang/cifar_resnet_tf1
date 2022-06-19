@@ -108,6 +108,7 @@ def train():
             print("********* tf.shape(logits): ", logits)
             print("********* tf.shape(inputs): ", inputs)
             print("********* tf.shape(labels): ", labels)
+            print("********* batch size: ", FLAGS.batch_size)
             cross_entropy = tf.losses.softmax_cross_entropy(logits=logits, onehot_labels=labels)
 
             loss = cross_entropy + _WEIGHT_DECAY * tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
