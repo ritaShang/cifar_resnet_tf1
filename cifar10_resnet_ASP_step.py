@@ -201,8 +201,8 @@ def train():
                         num_examples_per_step = batch_size_num
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = float(duration)
-                        format_str = ('%s:local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
-                        print(format_str % (datetime.now(), step, g_step, loss_value, examples_per_sec, sec_per_batch))
+                        format_str = ('%s:[worker %d] local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
+                        print(format_str % (datetime.now(), FLAGS.task_index, step, g_step, loss_value, examples_per_sec, sec_per_batch))
                         loss_file.write("%s\t%d\t%s\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
                 
