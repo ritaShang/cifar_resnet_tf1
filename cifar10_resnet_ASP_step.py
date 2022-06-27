@@ -203,7 +203,7 @@ def train():
                     tag = 0
                     FirstSessRunTime = fisrt_sessrun_done - train_begin
 
-                if step % 2 == 0:
+                if step % 5 == 0:
                         duration = time.time() - start_time
                         num_examples_per_step = batch_size_num
                         examples_per_sec = num_examples_per_step / duration
