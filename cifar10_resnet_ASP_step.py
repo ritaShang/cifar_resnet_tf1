@@ -36,6 +36,7 @@ tf.app.flags.DEFINE_string('TF_FORCE_GPU_ALLOW_GROWTH', 'false', """""")
 tf.app.flags.DEFINE_integer('max_imgs', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
+tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
@@ -79,7 +80,7 @@ def train():
                "_resnet" + str(FLAGS.resnet_size) + \
                "_b" + str(FLAGS.batch_size) + "_imgs" + str(FLAGS.max_imgs) + ".txt"
         loss_file = open(file, "w")
-        loss_file.write("datetime\tg_step\tg_img\tloss_value\texamples_per_sec\tsec_per_batch")
+        loss_file.write("datetime\tg_step\tg_img\tloss_value\texamples_per_sec\tsec_per_batch\n")
 
         worker_device = "/job:worker/task:%d" % FLAGS.task_index
         if FLAGS.num_gpus > 0:
@@ -124,7 +125,7 @@ def train():
                                             decay_steps,
                                             LEARNING_RATE_DECAY_FACTOR,
                                             staircase=True)
-            opt = tf.train.GradientDescentOptimizer(lr)
+            opt = tf.train.GradientDescentOptimizer(lr * FLAGS.lr_adjust)
 
             # Track the moving averages of all trainable variables.
             exp_moving_averager = tf.train.ExponentialMovingAverage(MOVING_AVERAGE_DECAY, global_step)
