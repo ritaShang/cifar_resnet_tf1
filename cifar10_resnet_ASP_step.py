@@ -33,7 +33,7 @@ tf.app.flags.DEFINE_integer("num_gpus", 0, "Total number of gpus for each machin
 tf.app.flags.DEFINE_string('dataset', "cifar100", """The dataset to use.""")
 
 tf.app.flags.DEFINE_string('TF_FORCE_GPU_ALLOW_GROWTH', 'false', """""")
-tf.app.flags.DEFINE_integer('max_steps', 3000, """Number of batches to run.""")
+tf.app.flags.DEFINE_integer('max_imgs', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
@@ -77,8 +77,9 @@ def train():
             tf.gfile.MakeDirs(FLAGS.train_dir)
         file = FLAGS.train_dir + "/" + FLAGS.job_name + str(FLAGS.task_index) + \
                "_resnet" + str(FLAGS.resnet_size) + \
-               "_b" + str(FLAGS.batch_size) + "_s" + str(FLAGS.max_steps) + ".txt"
+               "_b" + str(FLAGS.batch_size) + "_imgs" + str(FLAGS.max_imgs) + ".txt"
         loss_file = open(file, "w")
+        loss_file.write("datetime\tg_step\tg_img\tloss_value\texamples_per_sec\tsec_per_batch")
 
         worker_device = "/job:worker/task:%d" % FLAGS.task_index
         if FLAGS.num_gpus > 0:
@@ -93,6 +94,11 @@ def train():
             global_step = tf.get_variable(
                     'global_step', [],
                     initializer=tf.constant_initializer(0), trainable=False)
+            global_img = tf.get_variable(
+                    'global_img', [],
+                    initializer=tf.constant_initializer(0), trainable=False)
+            img_op = tf.add(global_img, FLAGS.batch_size)
+            img_update = tf.assign(global_img, img_op)
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
@@ -175,18 +181,18 @@ def train():
             """Train CIFAR-10 for a number of steps."""
 
             step = 0
-            g_step = 0
+            g_img = 0
             train_begin = time.time()
             InitialTime = train_begin - enter_time
             print("Initial time is @ %f" % InitialTime)
             print("Training begins @ %f" % train_begin)
             tag = 1
             batch_size_num = FLAGS.batch_size
-            while g_step <= FLAGS.max_steps:
+            while g_img < FLAGS.max_imgs:
                 start_time = time.time()
                 #run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 #run_metadata = tf.RunMetadata()
-                _, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num})
+                _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
                 
@@ -196,14 +202,14 @@ def train():
                     tag = 0
                     FirstSessRunTime = fisrt_sessrun_done - train_begin
 
-                if step % 10 == 0:
+                if step % 2 == 0:
                         duration = time.time() - start_time
                         num_examples_per_step = batch_size_num
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = float(duration)
-                        format_str = ('%s:[worker %d] local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
-                        print(format_str % (datetime.now(), FLAGS.task_index, step, g_step, loss_value, examples_per_sec, sec_per_batch))
-                        loss_file.write("%s\t%d\t%s\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec, sec_per_batch))
+                        format_str = ('[worker %d] local_step %d (global_step %d, img_update %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
+                        print(format_str % (FLAGS.task_index, step, g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
+                        loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
                 
             train_end = time.time()
@@ -217,7 +223,6 @@ def train():
             # end of with
 
 def main(argv=None):
-    #cifar10.maybe_download_and_extract()
     os.environ['TF_FORCE_GPU_ALLOW_GROWTH'] = FLAGS.TF_FORCE_GPU_ALLOW_GROWTH
     train()
 
