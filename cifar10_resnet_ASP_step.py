@@ -37,6 +37,7 @@ tf.app.flags.DEFINE_integer('max_imgs', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
+tf.app.flags.DEFINE_float('lr', 0.01, """The adjusted learning rate""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
@@ -120,11 +121,8 @@ def train():
 
             loss = cross_entropy + _WEIGHT_DECAY * tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
             # Decay the learning rate exponentially based on the number of steps.
-            lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
-                                            global_step,
-                                            decay_steps,
-                                            LEARNING_RATE_DECAY_FACTOR,
-                                            staircase=True)
+            #lr = tf.train.exponential_decay(INITIAL_LEARNING_RATE, global_step, decay_steps, LEARNING_RATE_DECAY_FACTOR, staircase=True)
+            lr = FLAGS.lr
             opt = tf.train.GradientDescentOptimizer(lr * FLAGS.lr_adjust)
 
             # Track the moving averages of all trainable variables.
