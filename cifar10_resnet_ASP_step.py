@@ -11,6 +11,7 @@ import numpy as np
 import tensorflow as tf
 import resnet_model
 
+
 import cifar10
 from tensorflow.python.client import timeline
 
