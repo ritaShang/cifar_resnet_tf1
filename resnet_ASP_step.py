@@ -81,7 +81,7 @@ def train():
                "_resnet" + str(FLAGS.resnet_size) + \
                "_b" + str(FLAGS.batch_size) + "_s" + str(FLAGS.max_steps) + ".txt"
         loss_file = open(file, "w")
-        loss_file.write("datetime\tg_step\tloss_value\texamples_per_sec\tsec_per_batch\n")
+        loss_file.write("datetime\tg_step\tg_img\tloss_value\texamples_per_sec\tsec_per_batch\n")
 
         worker_device = "/job:worker/task:%d" % FLAGS.task_index
         if FLAGS.num_gpus > 0:
@@ -96,6 +96,11 @@ def train():
             global_step = tf.get_variable(
                     'global_step', [],
                     initializer=tf.constant_initializer(0), trainable=False)
+            global_img = tf.get_variable(
+                    'global_img', [],
+                    initializer=tf.constant_initializer(0), trainable=False)
+            img_op = tf.add(global_img, FLAGS.batch_size)
+            img_update = tf.assign(global_img, img_op)
 
             decay_steps = 50000*350.0/FLAGS.batch_size
             batch_size = tf.placeholder(dtype=tf.int32, shape=(), name='batch_size')
@@ -186,7 +191,7 @@ def train():
                 start_time = time.time()
                 #run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                 #run_metadata = tf.RunMetadata()
-                _, loss_value, g_step = sess.run([train_op, loss, global_step], feed_dict={batch_size: batch_size_num})
+                _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
                 
@@ -202,8 +207,8 @@ def train():
                         examples_per_sec = num_examples_per_step / duration
                         sec_per_batch = float(duration)
                         format_str = ('[worker %d] local_step %d (global_step %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
-                        print(format_str % (FLAGS.task_index, step, g_step, loss_value, examples_per_sec, sec_per_batch))
-                        loss_file.write("%s\t%d\t%s\t%s\t%s\n" %(datetime.now(), g_step, loss_value, examples_per_sec, sec_per_batch))
+                        print(format_str % (FLAGS.task_index, step, g_img, loss_value, examples_per_sec, sec_per_batch))
+                        loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
                 
             train_end = time.time()
