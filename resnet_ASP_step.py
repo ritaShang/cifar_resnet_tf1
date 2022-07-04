@@ -38,6 +38,7 @@ tf.app.flags.DEFINE_integer('max_steps', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
+tf.app.flags.DEFINE_integer('trytag', 0, """The size of the ResNet model to use.""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
@@ -79,7 +80,7 @@ def train():
             tf.gfile.MakeDirs(FLAGS.train_dir)
         file = FLAGS.train_dir + "/" + FLAGS.job_name + str(FLAGS.task_index) + \
                "_resnet" + str(FLAGS.resnet_size) + \
-               "_b" + str(FLAGS.batch_size) + "_s" + str(FLAGS.max_steps) + ".txt"
+               "_b" + str(FLAGS.batch_size) + "_s" + str(FLAGS.max_steps) + "_" + str(FLAGS.trytag) + ".txt"
         loss_file = open(file, "w")
         loss_file.write("datetime\tg_step\tg_img\tloss_value\texamples_per_sec\tsec_per_batch\n")
 
