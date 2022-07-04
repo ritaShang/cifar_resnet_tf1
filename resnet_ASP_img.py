@@ -38,7 +38,6 @@ tf.app.flags.DEFINE_integer('max_imgs', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
-#tf.app.flags.DEFINE_float('lr', 0.01, """The adjusted learning rate""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
