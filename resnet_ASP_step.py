@@ -113,9 +113,6 @@ def train():
             elif FLAGS.dataset == "cifar100":
                 labels = tf.one_hot(labels, 100, 1, 0)
             logits = network(inputs, True)
-            print("********* tf.shape(logits): ", logits)
-            print("********* tf.shape(inputs): ", inputs)
-            print("********* tf.shape(labels): ", labels)
             print("********* batch size: ", FLAGS.batch_size)
             cross_entropy = tf.losses.softmax_cross_entropy(logits=logits, onehot_labels=labels)
 

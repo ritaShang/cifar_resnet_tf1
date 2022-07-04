@@ -63,7 +63,7 @@ def read_cifar10(dataset, filename_queue):
     label_bytes = 1  # 1 for CIFAR-10
   elif dataset == "cifar100":
     label_bytes = 2  # 2 for CIFAR-100
-  print("label bytes:", label_bytes)
+  print("********* label bytes:", label_bytes)
 
   result.height = 32
   result.width = 32
@@ -159,7 +159,6 @@ def distorted_inputs(dataset, data_dir, batch_size):
   for f in filenames:
     if not tf.gfile.Exists(f):
         raise ValueError('Failed to find file: ' + f)
-  print("********* filenames: ", filenames)
 
   # Create a queue that produces the filenames to read.
   filename_queue = tf.train.string_input_producer(filenames)

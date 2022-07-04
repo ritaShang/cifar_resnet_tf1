@@ -232,8 +232,7 @@ def cifar10_resnet_v2_generator(resnet_size, num_classes, data_format=None):
       # provides a large performance boost on GPU.
       inputs = tf.transpose(inputs, [0, 3, 1, 2])
 
-    print('inputs')
-    print(inputs.get_shape().as_list())
+    print('********* inputs:', inputs.get_shape().as_list())
     inputs = conv2d_fixed_padding(
         inputs=inputs, filters=16, kernel_size=3, strides=1,
         data_format=data_format)
