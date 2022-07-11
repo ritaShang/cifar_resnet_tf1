@@ -191,6 +191,7 @@ def train():
                 _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
+                time.sleep( 0.8 )
                 
                 fisrt_sessrun_done = time.time()
                 if tag:
@@ -207,7 +208,6 @@ def train():
                         print(format_str % (FLAGS.task_index, step, g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                         loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
-                time.sleep( 0.8 )
                 
             train_end = time.time()
             loss_file.write("TrainTime\t%f\n" %(train_end-train_begin))
