@@ -7,7 +7,6 @@ from datetime import datetime
 import os.path
 import time
 
-import numpy as np
 import tensorflow as tf
 import resnet_model
 
