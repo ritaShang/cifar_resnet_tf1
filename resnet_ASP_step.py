@@ -132,6 +132,8 @@ def train():
             grads0 = opt.compute_gradients(loss) 
             grads = [(tf.scalar_mul(tf.cast(batch_size/FLAGS.batch_size, tf.float32), grad), var) for grad, var in grads0]
 
+            time.sleep( FLAGS.sleep )
+
             if issync:
                 opt = tf.train.SyncReplicasOptimizer(
                     opt,
@@ -192,7 +194,7 @@ def train():
                 _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
-                time.sleep( FLAGS.sleep )
+
 
                 if tag:
                     fisrt_sessrun_done = time.time()
