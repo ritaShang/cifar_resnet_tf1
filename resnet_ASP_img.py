@@ -194,8 +194,8 @@ def train():
                    # ctf = tl.generate_chrome_trace_format()
                 time.sleep( FLAGS.sleep )
 
-                fisrt_sessrun_done = time.time()
                 if tag:
+                    fisrt_sessrun_done = time.time()
                     print("First sessrun time is @ %f" % (fisrt_sessrun_done - train_begin))
                     tag = 0
                     FirstSessRunTime = fisrt_sessrun_done - train_begin
