@@ -37,7 +37,8 @@ tf.app.flags.DEFINE_integer('max_steps', 50000, """Number of batches to run.""")
 tf.app.flags.DEFINE_boolean('log_device_placement', False, """Whether to log device placement.""")
 tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model to use.""")
 tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
-tf.app.flags.DEFINE_integer('trytag', 0, """The size of the ResNet model to use.""")
+tf.app.flags.DEFINE_integer('trytag', 0, """the try times tag""")
+tf.app.flags.DEFINE_float('sleep', 0, """adjust gpu usage""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
@@ -191,7 +192,8 @@ def train():
                 _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
                    # tl = timeline.Timeline(run_metadata.step_stats)
                    # ctf = tl.generate_chrome_trace_format()
-                
+                time.sleep( FLAGS.sleep )
+
                 fisrt_sessrun_done = time.time()
                 if tag:
                     print("First sessrun time is @ %f" % (fisrt_sessrun_done - train_begin))
@@ -200,8 +202,7 @@ def train():
 
                 if step % 5 == 0:
                         duration = time.time() - start_time
-                        num_examples_per_step = batch_size_num
-                        examples_per_sec = num_examples_per_step / duration
+                        examples_per_sec = batch_size_num / duration
                         sec_per_batch = float(duration)
                         format_str = ('[worker %d] local_step %d (global_steps %d, img_update %d), loss = %.2f (%.1f examples/sec; %.3f sec/batch)')
                         print(format_str % (FLAGS.task_index, step, g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
