@@ -207,7 +207,7 @@ def train():
                         print(format_str % (FLAGS.task_index, step, g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                         loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
-                time.sleep( 0.02 )
+                time.sleep( 0.01 )
                 
             train_end = time.time()
             loss_file.write("TrainTime\t%f\n" %(train_end-train_begin))
