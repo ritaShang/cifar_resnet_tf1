@@ -39,6 +39,7 @@ tf.app.flags.DEFINE_integer('resnet_size', 50, """The size of the ResNet model t
 tf.app.flags.DEFINE_float('lr_adjust', 1, """The adjusted learning rate""")
 tf.app.flags.DEFINE_integer('trytag', 0, """the try times tag""")
 tf.app.flags.DEFINE_float('sleep', 0, """adjust gpu usage""")
+tf.app.flags.DEFINE_boolean('prof', False, """Whether to profile.""")
 # cifar10_resnet_v2_generator(resnet 14 32 50 110 152 200)
 # resnet_v2(resnet 18 34 50 101 152 200)
 
@@ -191,16 +192,20 @@ def train():
             batch_size_num = FLAGS.batch_size
             while g_step < FLAGS.max_steps:
                 start_time = time.time()
-                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                run_metadata = tf.RunMetadata()
-                _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
+                if FLAGS.prof:
+                    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                    run_metadata = tf.RunMetadata()
+                    _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
                                                         feed_dict={batch_size: batch_size_num}, \
                                                         options=run_options, run_metadata=run_metadata)
-                tl = timeline.Timeline(run_metadata.step_stats)
-                ctf = tl.generate_chrome_trace_format()
-                tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
-                with open(tlfile, 'w') as f:
-                    f.write(ctf)
+                    tl = timeline.Timeline(run_metadata.step_stats)
+                    ctf = tl.generate_chrome_trace_format()
+                    tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
+                    with open(tlfile, 'w') as f:
+                        f.write(ctf)
+                else:
+                     _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
+                                                        feed_dict={batch_size: batch_size_num})
 
 
                 if tag:
