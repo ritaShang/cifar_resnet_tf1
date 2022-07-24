@@ -225,21 +225,21 @@ def train():
                         loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
                 
-            
-            ## 统计参数量
-            opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
-            param_stats = profiler.profile_name_scope(options=opts)
-            # 总参数量
-            print('总参数:', param_stats.total_parameters)
-            # 各scope参数量
-            for x in param_stats.children:
-                print(x.name, 'scope参数:', x.total_parameters)
+            if FLAGS.prof:
+                ## 统计参数量
+                opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
+                param_stats = profiler.profile_name_scope(options=opts)
+                # 总参数量
+                print('总参数:', param_stats.total_parameters)
+                # 各scope参数量
+                for x in param_stats.children:
+                    print(x.name, 'scope参数:', x.total_parameters)
 
-            # 统计运算量
-            opts = tf.profiler.ProfileOptionBuilder.float_operation()
-            float_stats = profiler.profile_operations(opts)
-            # 总参数量
-            print('总浮点运算数:', float_stats.total_float_ops)
+                # 统计运算量
+                opts = tf.profiler.ProfileOptionBuilder.float_operation()
+                float_stats = profiler.profile_operations(opts)
+                # 总参数量
+                print('总浮点运算数:', float_stats.total_float_ops)
             
             
             train_end = time.time()
