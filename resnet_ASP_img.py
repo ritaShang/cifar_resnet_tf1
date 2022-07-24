@@ -78,6 +78,8 @@ def train():
         
         if not(tf.gfile.Exists(FLAGS.train_dir)):
             tf.gfile.MakeDirs(FLAGS.train_dir)
+            tf.gfile.MakeDirs(FLAGS.train_dir + '/timeline')
+
         file = FLAGS.train_dir + "/" + FLAGS.job_name + str(FLAGS.task_index) + \
                "_resnet" + str(FLAGS.resnet_size) + \
                "_b" + str(FLAGS.batch_size) + "_imgs" + str(FLAGS.max_imgs) + "_" + str(FLAGS.trytag) + ".txt"
@@ -189,11 +191,16 @@ def train():
             batch_size_num = FLAGS.batch_size
             while g_img < FLAGS.max_imgs:
                 start_time = time.time()
-                #run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-                #run_metadata = tf.RunMetadata()
-                _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], feed_dict={batch_size: batch_size_num})
-                   # tl = timeline.Timeline(run_metadata.step_stats)
-                   # ctf = tl.generate_chrome_trace_format()
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
+                _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
+                                                        feed_dict={batch_size: batch_size_num}, \
+                                                        options=run_options, run_metadata=run_metadata)
+                tl = timeline.Timeline(run_metadata.step_stats)
+                ctf = tl.generate_chrome_trace_format()
+                tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
+                with open(tlfile, 'w') as f:
+                    f.write(ctf)
                
 
                 if tag:
