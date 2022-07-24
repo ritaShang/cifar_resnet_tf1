@@ -1,3 +1,4 @@
+#coding=utf-8
 import os
 import tempfile
  
@@ -24,7 +25,7 @@ mnist_save_dir = os.path.join(tempfile.gettempdir(), 'MNIST_data')
 mnist = input_data.read_data_sets(mnist_save_dir, one_hot=True)
  
 # get tracing data
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
   sess.run(tf.global_variables_initializer())
   
   # 创建Profiler实例作为记录、处理、显示数据的主体
@@ -47,33 +48,33 @@ with tf.Session() as sess:
     # 将当前step的统计数据添加到Profiler实例中
     profiler.add_step(step=i, run_meta=run_metadata)
 
-    ## 统计参数量
-    opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
-    param_stats = profiler.profile_name_scope(options=opts)
-    # 总参数量
-    print('总参数：', param_stats.total_parameters)
-    # 各scope参数量
-    for x in param_stats.children:
-        print(x.name, 'scope参数：', x.total_parameters)
+  ## 统计参数量
+  opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
+  param_stats = profiler.profile_name_scope(options=opts)
+  # 总参数量
+  print('总参数：', param_stats.total_parameters)
+  # 各scope参数量
+  for x in param_stats.children:
+    print(x.name, 'scope参数：', x.total_parameters)
 
-    # 统计运算量
-    opts = tf.profiler.ProfileOptionBuilder.float_operation()
-    float_stats = profiler.profile_operations(opts)
-    # 总参数量
-    print('总浮点运算数：', float_stats.total_float_ops)
+  # 统计运算量
+  opts = tf.profiler.ProfileOptionBuilder.float_operation()
+  float_stats = profiler.profile_operations(opts)
+  # 总参数量
+  print('总浮点运算数：', float_stats.total_float_ops)
 
-    # 统计模型内存和耗时情况
-    builder = tf.profiler.ProfileOptionBuilder
-    opts = builder(builder.time_and_memory())
-    #opts.with_step(1)
-    opts.with_timeline_output('timeline.json')
-    opts = opts.build()
-    
-    #profiler.profile_name_scope(opts) # 只能保存单step的timeline
-    profiler.profile_graph(opts) # 保存各个step的timeline
+  # 统计模型内存和耗时情况
+  builder = tf.profiler.ProfileOptionBuilder
+  opts = builder(builder.time_and_memory())
+  #opts.with_step(1)
+  opts.with_timeline_output('timeline.json')
+  opts = opts.build()
+  
+  #profiler.profile_name_scope(opts) # 只能保存单step的timeline
+  profiler.profile_graph(opts) # 保存各个step的timeline
 
-    opts = {'AcceleratorUtilizationChecker': {},
-            'ExpensiveOperationChecker': {},
-            'JobChecker': {},
-            'OperationChecker': {}}
-    profiler.advise(opts)
+  opts = {'AcceleratorUtilizationChecker': {},
+          'ExpensiveOperationChecker': {},
+          'JobChecker': {},
+          'OperationChecker': {}}
+  profiler.advise(opts)
