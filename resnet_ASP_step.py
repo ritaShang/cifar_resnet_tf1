@@ -193,16 +193,18 @@ def train():
             while g_step < FLAGS.max_steps:
                 start_time = time.time()
                 if FLAGS.prof:
+                    profiler = tf.profiler.Profiler(graph=sess.graph)
                     run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
                     run_metadata = tf.RunMetadata()
                     _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
                                                         feed_dict={batch_size: batch_size_num}, \
                                                         options=run_options, run_metadata=run_metadata)
-                    tl = timeline.Timeline(run_metadata.step_stats)
-                    ctf = tl.generate_chrome_trace_format()
-                    tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
-                    with open(tlfile, 'w') as f:
-                        f.write(ctf)
+                    profiler.add_step(step=step, run_meta=run_metadata)
+                    #tl = timeline.Timeline(run_metadata.step_stats)
+                    #ctf = tl.generate_chrome_trace_format()
+                    #tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
+                    #with open(tlfile, 'w') as f:
+                    #    f.write(ctf)
                 else:
                      _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
                                                         feed_dict={batch_size: batch_size_num})
@@ -222,7 +224,24 @@ def train():
                         print(format_str % (FLAGS.task_index, step, g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                         loss_file.write("%s\t%d\t%s\t%s\t%s\t%s\n" %(datetime.now(), g_step, g_img, loss_value, examples_per_sec, sec_per_batch))
                 step += 1
-                
+
+            
+            ## 统计参数量
+            opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
+            param_stats = profiler.profile_name_scope(options=opts)
+            # 总参数量
+            print('总参数:', param_stats.total_parameters)
+            # 各scope参数量
+            for x in param_stats.children:
+                print(x.name, 'scope参数:', x.total_parameters)
+
+            # 统计运算量
+            opts = tf.profiler.ProfileOptionBuilder.float_operation()
+            float_stats = profiler.profile_operations(opts)
+            # 总参数量
+            print('总浮点运算数:', float_stats.total_float_ops)
+
+
             train_end = time.time()
             loss_file.write("TrainTime\t%f\n" %(train_end-train_begin))
             loss_file.write("InitialTime\t%f\n" %InitialTime)
