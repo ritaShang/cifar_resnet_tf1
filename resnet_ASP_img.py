@@ -117,7 +117,6 @@ def train():
             elif FLAGS.dataset == "cifar100":
                 labels = tf.one_hot(labels, 100, 1, 0)
             logits = network(inputs, True)
-            print("********* batch size: ", FLAGS.batch_size)
             cross_entropy = tf.losses.softmax_cross_entropy(logits=logits, onehot_labels=labels)
 
             loss = cross_entropy + _WEIGHT_DECAY * tf.add_n([tf.nn.l2_loss(v) for v in tf.trainable_variables()])
@@ -186,6 +185,7 @@ def train():
             g_img = 0
             train_begin = time.time()
             InitialTime = train_begin - enter_time
+            print("Batch size: @", FLAGS.batch_size)
             print("Initial time is @ %f" % InitialTime)
             print("Training begins @ %f" % train_begin)
             tag = 1
