@@ -199,7 +199,7 @@ def train():
                     _, loss_value, g_step, g_img = sess.run([train_op, loss, global_step, img_update], \
                                                         feed_dict={batch_size: batch_size_num}, \
                                                         options=run_options, run_metadata=run_metadata)
-                    profiler.add_step(step=i, run_meta=run_metadata)
+                    profiler.add_step(step=step, run_meta=run_metadata)
                     # tl = timeline.Timeline(run_metadata.step_stats)
                     # ctf = tl.generate_chrome_trace_format()
                     # tlfile = FLAGS.train_dir + "/timeline/" + str(datetime.now()) + 'timeline.json'
